@@ -4,7 +4,7 @@ import { articlesRouter } from './articles'
 
 const router: Router = Router()
 
-router.use('/users', usersRouters)
-router.use('/articles', articlesRouter)
+router.use('/api/v1/users', usersRouters)
+router.use('/api/v1/articles', articlesRouter)
 
 export { router }
