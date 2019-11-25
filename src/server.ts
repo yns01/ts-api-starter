@@ -1,9 +1,10 @@
 import './config/'
+import { promisify } from 'util'
 import http from 'http'
 import stoppable, { StoppableServer } from 'stoppable'
 import { app } from './app'
 import { createOpsApp } from './app.ops'
-import { promisify } from 'util'
+import { logger } from './lib/logger'
 
 const defaultTerminationGracePeriods = 30
 
@@ -33,11 +34,11 @@ const onError = (serverName: string) => (error: any) => {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(`${serverName}: ${bind} requires elevated privileges`)
+      logger.error(`${serverName}: ${bind} requires elevated privileges`)
       process.exit(1)
       break
     case 'EADDRINUSE':
-      console.error(`${serverName}:${bind} is already in use`)
+      logger.error(`${serverName}:${bind} is already in use`)
       process.exit(1)
       break
     default:
@@ -52,7 +53,7 @@ const onError = (serverName: string) => (error: any) => {
 const onListening = (serverName: string, server: StoppableServer) => () => {
   const addr = server.address()
   const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr ? addr.port : 'null'}`
-  console.info(`${serverName} Listening on ${bind}`)
+  logger.info(`${serverName} listening on ${bind}`)
 }
 
 appServer.listen(port)
@@ -73,12 +74,12 @@ opsServer.on('listening', onListening('opsServer', opsServer))
  *
  */
 const handleError = (err: Error) => {
-  console.warn('Error happened during graceful shutdown', err)
+  logger.warn('Error happened during graceful shutdown', err)
   process.exit(1)
 }
 
 const handleSignal = (signal: string) => () => {
-  console.warn(`Got ${signal}. Graceful shutdown start`, new Date().toISOString())
+  logger.warn(`Got ${signal}. Graceful shutdown start`, new Date().toISOString())
 
   try {
     const stopOpsServer = promisify(opsServer.stop)
@@ -86,7 +87,7 @@ const handleSignal = (signal: string) => () => {
 
     Promise.all([stopOpsServer(), stopAppServer()])
       .then(() => {
-        console.warn('Successful graceful shutdown', new Date().toISOString())
+        logger.warn('Successful graceful shutdown', new Date().toISOString())
         process.exit(0)
       })
       .catch(handleError)
