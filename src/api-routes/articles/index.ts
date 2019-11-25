@@ -1,13 +1,10 @@
-import { Router, Request, Response } from 'express'
+import { Router } from 'express'
+import * as articlesHandlers from './handlers'
 
 const router: Router = Router()
 
-router.get('/', (_req: Request, res: Response) => {
-  res.status(200).send({})
-})
+router.get('/', articlesHandlers.get)
 
-router.post('/', (_req: Request, res: Response) => {
-  res.status(204).send()
-})
+router.post('/', articlesHandlers.create)
 
 export { router as articlesRouter }
