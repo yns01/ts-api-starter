@@ -1,11 +1,10 @@
-import express, { Request, Response } from 'express'
+import express from 'express'
+import { router } from './api-routes'
 
 const app: express.Application = express()
 
 app.use(express.json())
 
-app.get('/', (_req: Request, res: Response) => {
-  res.status(200).send()
-})
+app.use('/', router)
 
 export { app }
